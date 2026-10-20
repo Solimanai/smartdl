@@ -24,7 +24,10 @@ jobs:
           rm -rf test
           python3 tools/patch_android.py
           flutter pub get
-          find "$HOME/.pub-cache/hosted/pub.dev" -path "*/android/*" \( -name build.gradle -o -name build.gradle.kts \) -exec sed -i 's/proguard-android\.txt/proguard-android-optimize.txt/g' {} +
+          P="$HOME/.pub-cache/hosted/pub.dev"
+          find "$P" -path "*/android/*" \( -name build.gradle -o -name build.gradle.kts \) -exec sed -i 's/proguard-android\.txt/proguard-android-optimize.txt/g' {} +
+          find "$P" -path "*/android/*" -name build.gradle -exec sed -i -E 's/compileSdk(Version)?[ =]+[0-9]+/compileSdk 36/g' {} +
+          find "$P" -path "*/android/*" -name build.gradle.kts -exec sed -i -E 's/compileSdk(Version)?[ =]+[0-9]+/compileSdk = 36/g' {} +
       - name: Build APK
         working-directory: app
         run: flutter build apk --release
