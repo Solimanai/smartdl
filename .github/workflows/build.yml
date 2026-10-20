@@ -1,0 +1,33 @@
+name: Build SmartDL
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip project
+        run: unzip -q smartdl_app.zip -d app
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Prepare
+        working-directory: app
+        run: |
+          rm -rf test
+          flutter create --platforms=android --project-name smartdl --org com.smartdl.app .
+          rm -rf test
+          python3 tools/patch_android.py
+          flutter pub get
+      - name: Build APK
+        working-directory: app
+        run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SmartDL-apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk
